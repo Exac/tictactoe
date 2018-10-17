@@ -1,0 +1,75 @@
+<main class="play">
+  <nav class="sitenav">
+
+  </nav>
+  
+  <section class="playarea" [class.myturn]="state.isPlayerTurn">
+    <span class="coords" style="left: -1rem; top: 83.4%;">1</span>
+    <span class="coords" style="left: -1rem; top: 50.0%;">2</span>
+    <span class="coords" style="left: -1rem; top: 16.6%;">3</span>
+    <span class="coords" style="left: 16.6%; top: 100%;">a</span>
+    <span class="coords" style="left: 50.0%; top: 100%;">b</span>
+    <span class="coords" style="left: 83.4%; top: 100%;">c</span>
+    <button id="a3" [ngClass]="state.board[0][0]" (click)="place($event)"></button>
+    <button id="b3" [ngClass]="state.board[0][1]" (click)="place($event)"></button>
+    <button id="c3" [ngClass]="state.board[0][2]" (click)="place($event)"></button>
+    <button id="a2" [ngClass]="state.board[1][0]" (click)="place($event)"></button>
+    <button id="b2" [ngClass]="state.board[1][1]" (click)="place($event)"></button>
+    <button id="c2" [ngClass]="state.board[1][2]" (click)="place($event)"></button>
+    <button id="a1" [ngClass]="state.board[2][0]" (click)="place($event)"></button>
+    <button id="b1" [ngClass]="state.board[2][1]" (click)="place($event)"></button>
+    <button id="c1" [ngClass]="state.board[2][2]" (click)="place($event)"></button>
+    <aside *ngIf="state.isInQueue" class="popup">
+      <div class="heading title">
+        <span>Finding opponent...</span>
+      </div>
+      <div class="message">
+        <!-- <span>Finding opponent...</span> -->
+      </div>
+      <div class="loading indeterminate"></div>
+    </aside>
+  </section>
+  <aside class="sidebar">
+    <div class="aboutplayer opponent">
+      <div class="usericon"></div>
+      <span class="usertagline">{{state.opponentAlias}}</span>
+      <span class="userelo">({{state.opponentElo}})</span>
+    </div>
+    <app-chances class="chances" percent="50"></app-chances>
+    <div class="opening">Starting Position</div>
+    <div class="movelist">
+      <ol>
+        <li>
+          <span class="xmove">a1</span>
+          <span class="omove">c3</span>
+        </li>
+        <li>
+          <span class="xmove">a3</span>
+          <span class="omove">a2</span>
+        </li>
+        <li>
+          <span class="xmove">c1</span>
+          <span class="omove">b1</span>
+        </li>
+        <li>
+          <span class="xmove">b2</span>
+          <span class="omove">b3</span>
+        </li>
+        <li>
+          <span class="xmove">c2</span>
+        </li>
+      </ol>
+    </div>
+    <div class="controls">
+      <button class="newgame" (click)="queue($event, 'ai')" title="AI">+</button>
+      <button class="surrender" (click)="forefit($event)" title="Surrender">⚐</button>
+      <button class="undo" (click)="queue($event, 'pvp')" title="PvP">&#9003;</button>
+    </div>
+    <div class="aboutplayer player">
+      <div class="usericon"></div>
+      <span class="usertagline">Username</span>
+    </div>
+  </aside>
+</main>
+<div style="height:50px; margin: 0; padding: 0;color: red; background-color: red;z-index: 30;">red</div>
+<div style="background-color: yellow; padding: 24em 2em; max-width: 100vw; overflow: hidden; ">Footer</div>

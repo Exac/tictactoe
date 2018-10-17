@@ -1,0 +1,13 @@
+{
+  "name": "tictactoe",
+  "version": "1.0.0",
+  "description": "TicTacToe",
+  "scripts": {
+    "start": "concurrently --kill-others \"cd angular && ng serve\" \"cd node && npm run dev\""
+  },
+  "author": "Thomas McLennan <contact@thomasmclennan.ca>",
+  "license": "MIT",
+  "dependencies": {
+    "concurrently": "^4.0.1"
+  }
+}

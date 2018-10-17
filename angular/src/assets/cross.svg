@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="101px"
+	 height="101px" viewBox="0 0 101 101" enable-background="new 0 0 101 101" xml:space="preserve">
+<g id="cross">
+	<polygon id="color_1_" fill="#565452" points="94.69,23.98 77.02,6.31 50.5,32.82 23.98,6.31 6.31,23.98 32.82,50.5 6.31,77.02 
+		23.98,94.69 50.5,68.18 77.02,94.69 94.69,77.02 68.18,50.5 	"/>
+	<polygon id="shadow_1_" fill="#454242" points="93.15,23.96 77.22,8.03 50.81,32.82 77.32,6.31 95,23.98 68.48,50.5 95,77.02 
+		77.32,94.69 50.81,68.18 77.3,92.84 92.91,77.16 66.43,50.5 	"/>
+	<polygon id="highlight_2_" fill="#878584" points="8.15,23.96 24.08,8.03 50.5,32.82 23.98,6.31 6.31,23.98 32.82,50.5 6.31,77.02 
+		23.98,94.69 50.5,68.18 24,92.84 8.4,77.16 34.87,50.5 	"/>
+	<polygon id="outline_1_" fill="none" stroke="#262626" stroke-miterlimit="10" points="94.69,23.98 77.02,6.31 50.5,32.82 
+		23.98,6.31 6.31,23.98 32.82,50.5 6.31,77.02 23.98,94.69 50.5,68.18 77.02,94.69 94.69,77.02 68.18,50.5 	"/>
+</g>
+</svg>

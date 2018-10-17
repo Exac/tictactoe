@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="boardbg" class="boardbg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+ width="3px" height="3px"  xml:space="preserve">
+        <rect fill="#769656" width="1" height="1"/>
+        <rect fill="#769656" x="2" width="1" height="1"/>
+        <rect fill="#769656" y="2" width="1" height="1"/>
+        <rect fill="#769656" x="2" y="2" width="1" height="1"/>
+        <rect fill="#769656" x="1" y="1" width="1" height="1"/>
+        <rect fill="#769656" width="1" height="1"/>
+        <rect fill="#eeeed2" x="1" width="1" height="1"/>
+        <rect fill="#eeeed2" y="1" width="1" height="1"/>
+        <rect fill="#eeeed2" x="2" y="1" width="1" height="1"/>
+        <rect fill="#eeeed2" x="1" y="2" width="1" height="1"/>
+</svg>

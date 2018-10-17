@@ -1,0 +1,40 @@
+.scoremeter {
+    display: block;
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 0;
+    margin: 0;
+    // max-width: calc(100vw - 30px);
+    // max-width: calc(100% - 30px);
+    overflow: hidden;
+    height: 35px;
+    max-height: 35px;
+    padding: 7px 15px;
+    font-size: 13px;
+    color: #666463;
+    overflow: hidden;
+    .white,
+    .black {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        min-width: 1px;
+        line-height: 35px;
+        overflow: hidden;
+    }
+    .white {
+        background-color: #ffffff;
+        left: 0;
+        padding-left: 1rem;
+    }
+    .black {
+        background-color: #45423e;
+        color: #ffffff;
+        right: 0;
+        text-align: right;
+        padding-right: 1rem;
+    }
+}

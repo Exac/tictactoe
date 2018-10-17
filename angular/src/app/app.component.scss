@@ -1,0 +1,23 @@
+ul, input {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #dddddd;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.light {
+    fill: #888888 !important;
+    background-color: #888888;
+    color: #888888;
+}
+
+.dark {
+    fill: #444444 !important;
+    background-color: #444444;
+    color: #444444;
+}
+
+rect {
+    fill: red;
+}
+

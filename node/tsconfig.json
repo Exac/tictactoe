@@ -1,0 +1,42 @@
+{
+    "compileOnSave": false,
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "/node_modules/**/*"
+    ],
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "pretty": true,
+        "sourceMap": true,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": false,
+        "importHelpers": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "outDir": "./dist",
+        "baseUrl": "./src",
+        "lib": [
+            "dom",
+            "es5",
+            "es6"
+        ],
+        "types": [
+            "node",
+        ],
+        "typeRoots": [
+            "./node_modules/@types",
+        ],
+    },
+    "files": [
+        "./src/index.ts"
+    ]
+}
