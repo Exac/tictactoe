@@ -10,11 +10,9 @@ import GameState from '../shared/gamestate';
   styleUrls: ['./play-computer.component.scss']
 })
 export class PlayComputerComponent implements OnInit, OnDestroy {
-
-  private turnNum: number = 1; // temporary
   private subscriptions: Subscription;
   protected playerMove: HTMLAudioElement;
-  protected sounds: any = {};
+  protected sounds: {[key: string]: HTMLAudioElement} = {};
   private state: GameState;
 
   constructor(private game: GameService) {
@@ -39,7 +37,6 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
   }
 
   private clearBoard = () => {
-    this.turnNum = 1;
     this.game.setState(new GameState());
   }
 
@@ -54,14 +51,11 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     const target: HTMLElement = (<HTMLElement>event.target);
     // Get square name from id ('a1', 'b2', 'c3')
     const square: string = target.id;
-    // Game is over after all squares are filled
-    if (this.turnNum > 9) {
+    // Game is over when all squares have been filled
+    if (this.state.board.reduce((acc, val) => acc.concat(val), []).indexOf('') < 0) {
       this.clearBoard();
       return;
     }
-    // if (this.state.board.flat().findIndex(i => i === '') === -1) {
-    //   // no more blank squares
-    // }
     // find coordinates
     let x: number;
     let y: number;
@@ -73,7 +67,6 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     if (square.charAt(1) === '3') x = 0;
     // Only move if it is the player's turn
     if (this.state.board[x][y].length === 0 && this.state.isPlayerTurn) {
-      this.turnNum++;
       this.sounds.move.play();
       this.game.move(x, y);
     } else if (!this.state.isPlayerTurn) {

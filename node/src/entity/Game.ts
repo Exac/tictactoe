@@ -25,10 +25,10 @@ export class Game {
     @Column({ unsigned: true, nullable: false })
     o: number;
 
-    @Column({ default: 'connected' })
+    @Column({ default: 'connected' }) // connected, forefited, winner, loser
     xstatus: string;
 
-    @Column({ default: 'connected' })
+    @Column({ default: 'connected' }) // connected, forefited, winner, loser
     ostatus: string;
 
     @Column()
