@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
       .pipe(first())
       .subscribe(
         result => this.router.navigate(['play/computer']),
-        err => this.error = 'Could not authenticate'
+        err => this.error = `Could not authenticate ${this.alias}:${this.password}`
       );
   }
 

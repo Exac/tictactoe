@@ -10,7 +10,8 @@ export default class GameState implements GameStateI {
     public playerAlias: string;
     public playerElo: number;
     private _playerType: 'x' | 'o';
-    public isInQueue: boolean;
+    public isInQueue: Date | false;
+    public isDisconnected: Date | false;
 
     constructor(board?: string[][], gameId?: number, opponentAlias?: string, opponentElo?: number, opponentType?: 'x' | 'o', playerType?: 'x' | 'o') {
         const helper = new JwtHelperService();
@@ -23,6 +24,7 @@ export default class GameState implements GameStateI {
         this.playerAlias = helper.decodeToken(localStorage.getItem('access_token')).alias;
         this.playerType = this.opponentType === 'x' ? 'o' : 'x'; // opposite
         this.isInQueue = false;
+        this.isDisconnected = false;
     }
 
     /**
@@ -66,8 +68,32 @@ export default class GameState implements GameStateI {
                 if (i === 'o') { ++ocount; }
             });
         });
-        return xcount > ocount
+        let turn: boolean =  xcount > ocount
             ? /* o's turn */(this.playerType === 'o')
             : /* x's turn */(this.playerType === 'x');
+        return !this.isInQueue ? turn : false;
     }
+
+    get winner(): 'x' | 'o' | false {
+        // poor code
+        let b = this.board;
+        if ((b[0][0] === 'x' && b[0][1] === 'x' && b[0][2] === 'x') ||
+            (b[1][0] === 'x' && b[1][1] === 'x' && b[1][2] === 'x') ||
+            (b[2][0] === 'x' && b[2][1] === 'x' && b[2][2] === 'x') ||
+            (b[0][0] === 'x' && b[1][0] === 'x' && b[2][0] === 'x') ||
+            (b[0][1] === 'x' && b[1][1] === 'x' && b[2][1] === 'x') ||
+            (b[0][2] === 'x' && b[1][2] === 'x' && b[2][2] === 'x') ||
+            (b[0][0] === 'x' && b[1][1] === 'x' && b[2][2] === 'x') ||
+            (b[2][0] === 'x' && b[1][1] === 'x' && b[0][2] === 'x')) { return 'x'; }
+        if ((b[0][0] === 'o' && b[0][1] === 'o' && b[0][2] === 'o') ||
+            (b[1][0] === 'o' && b[1][1] === 'o' && b[1][2] === 'o') ||
+            (b[2][0] === 'o' && b[2][1] === 'o' && b[2][2] === 'o') ||
+            (b[0][0] === 'o' && b[1][0] === 'o' && b[2][0] === 'o') ||
+            (b[0][1] === 'o' && b[1][1] === 'o' && b[2][1] === 'o') ||
+            (b[0][2] === 'o' && b[1][2] === 'o' && b[2][2] === 'o') ||
+            (b[0][0] === 'o' && b[1][1] === 'o' && b[2][2] === 'o') ||
+            (b[2][0] === 'o' && b[1][1] === 'o' && b[0][2] === 'o')) { return 'o'; }
+        return false;
+    }
+
 }

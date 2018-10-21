@@ -14,15 +14,41 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 export class GameService {
 
   public state: BehaviorSubject<GameState> = new BehaviorSubject<GameState>(new GameState());
-  private socket: WebSocket = new WebSocket('ws://localhost:3000/');
+  public secondsInQueue: number = 0;
+  private static secondsInQueuePoll;
+  private wsurl = `ws://localhost:3000/`;
+  private socket: WebSocket = new WebSocket(this.wsurl);
   private messageQueue: any[] = [];
 
-
-  constructor(public _gameService: GameService, public jwtService: JwtHelperService) {
+  constructor(public jwtService: JwtHelperService) {
     this.resetState();
+    this.initSocket();
+    GameService.secondsInQueuePoll = setInterval(() => {
+      const Q = this.state.getValue().isInQueue;
+      this.secondsInQueue = Q ? ++this.secondsInQueue : 0;
+    }, 1000);
+  }
 
-    this.socket.onerror = (error) => {
-      console.log('ERROR', error);
+  private initSocket() {
+
+    this.socket.onclose = (event: Event) => {
+      let _state = this.state.getValue();
+      _state.isDisconnected = new Date(Date.now());
+      let interval = setInterval(() => {
+        if (this.socket.readyState !== 1) { // 0 connecting, 1=open, 2=closing, 3=closed
+          this.socket = new WebSocket(this.wsurl)
+        } else {
+          this.initSocket();
+          _state.isDisconnected = false;
+          clearInterval(interval);
+        }
+
+      }, 2500)
+    }
+
+    this.socket.onerror = (error: ErrorEvent) => {
+      console.log('ERROR: ', error.message);
+      // this.socket.close();
     }
 
     this.socket.onopen = (x: any) => {
@@ -56,7 +82,6 @@ export class GameService {
       }
 
     }
-
   }
 
   private handleMatch = (message: { type: string, data: any[] }) => {
@@ -80,6 +105,7 @@ export class GameService {
       data: []
     };
     this.queue(message);
+    window.location.reload();
   }
 
   private send(data: any) {
@@ -91,11 +117,11 @@ export class GameService {
     message.type = 'queue';
     message.auth = localStorage.getItem('access_token');
     message.data = [against];
-    
+
     this.send(message);
     // tell our game state we've entered queue
     let _state = this.state.getValue();
-    _state.isInQueue = true;
+    _state.isInQueue = new Date(Date.now());
     this.setState(_state);
 
     console.log('queue', message)
@@ -142,7 +168,7 @@ export class GameService {
     console.log(`sb1`)
     let _state = this.state.getValue();
     // ensure it is the player's turn
-    if(_state.isPlayerTurn) {
+    if (_state.isPlayerTurn) {
       console.log(`sb2`)
       _state.board = board;
       // this.state.next(_state);
@@ -154,7 +180,7 @@ export class GameService {
    * Player makes a move.
    */
   public move = (x: number, y: number): boolean => {
-    if(this.state.value.isPlayerTurn && this.state.value.board[x][y].length===0)  {
+    if (this.state.value.isPlayerTurn && this.state.value.board[x][y].length === 0) {
       this.state.value.board[x][y] = this.state.value.isPlayerTurn ? this.state.value.playerType : this.state.value.opponentType;
       return true;
     } else {
@@ -167,29 +193,6 @@ export class GameService {
    */
   private resetState = () => {
     this.state.next(new GameState());
-  }
-
-  public getWinner = (_board?: string[][]): 'x' | 'o' | false => {
-    // bad code
-    // check all win conditions
-    let b = typeof _board !== 'undefined' ? _board : this.state.getValue().board;
-    if ((b[0][0] === 'x' && b[0][1] === 'x' && b[0][2] === 'x') ||
-      (b[1][0] === 'x' && b[1][1] === 'x' && b[1][2] === 'x') ||
-      (b[2][0] === 'x' && b[2][1] === 'x' && b[2][2] === 'x') ||
-      (b[0][0] === 'x' && b[1][0] === 'x' && b[2][0] === 'x') ||
-      (b[0][1] === 'x' && b[1][1] === 'x' && b[2][1] === 'x') ||
-      (b[0][2] === 'x' && b[1][2] === 'x' && b[2][2] === 'x') ||
-      (b[0][0] === 'x' && b[1][1] === 'x' && b[2][2] === 'x') ||
-      (b[2][0] === 'x' && b[1][1] === 'x' && b[0][2] === 'x')) { return 'x'; }
-      if ((b[0][0] === 'o' && b[0][1] === 'o' && b[0][2] === 'o') ||
-      (b[1][0] === 'o' && b[1][1] === 'o' && b[1][2] === 'o') ||
-      (b[2][0] === 'o' && b[2][1] === 'o' && b[2][2] === 'o') ||
-      (b[0][0] === 'o' && b[1][0] === 'o' && b[2][0] === 'o') ||
-      (b[0][1] === 'o' && b[1][1] === 'o' && b[2][1] === 'o') ||
-      (b[0][2] === 'o' && b[1][2] === 'o' && b[2][2] === 'o') ||
-      (b[0][0] === 'o' && b[1][1] === 'o' && b[2][2] === 'o') ||
-      (b[2][0] === 'o' && b[1][1] === 'o' && b[0][2] === 'o')) { return 'o'; }
-      return false;
   }
 
   /**

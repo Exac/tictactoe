@@ -19,14 +19,22 @@
     <button id="a1" [ngClass]="state.board[2][0]" (click)="place($event)"></button>
     <button id="b1" [ngClass]="state.board[2][1]" (click)="place($event)"></button>
     <button id="c1" [ngClass]="state.board[2][2]" (click)="place($event)"></button>
-    <aside *ngIf="state.isInQueue" class="popup">
+    <aside *ngIf="state.isInQueue" class="queue popup">
       <div class="heading title">
-        <span>Finding opponent...</span>
+        <span>Finding match</span><span class="time">{{ game.secondsInQueue }}</span>
       </div>
       <div class="message">
         <!-- <span>Finding opponent...</span> -->
       </div>
       <div class="loading indeterminate"></div>
+    </aside>
+    <aside *ngIf="state.isDisconnected" class="disconnect popup">
+      <div class="heading title">
+        <span>Disconnected</span>
+      </div>
+      <div class="message">
+        <span>Attempting to reconnect.</span>
+      </div>
     </aside>
   </section>
   <aside class="sidebar">

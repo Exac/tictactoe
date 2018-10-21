@@ -1,6 +1,8 @@
-<p style="border-color:#ffbbbb;" *ngIf="error">{{error}}</p>
-<form (ngSubmit)="submit()">
-  <input type="text" name="alias" [(ngModel)]="alias" placeholder="Alias" />
-  <input type="password" name="password" [(ngModel)]="password" placeholder="Password" />
-  <button type="submit">Login</button>
-</form>
+<pre>
+  <p style="border-color:#ffbbbb;" *ngIf="error">{{error}}</p>
+  <form (ngSubmit)="submit()">
+    <input type="text" name="alias" [(ngModel)]="alias" placeholder="Alias" />
+    <input type="password" name="password" [(ngModel)]="password" placeholder="Password" />
+    <button type="submit">Login</button>
+  </form>
+</pre>

@@ -215,6 +215,9 @@ nav.sitenav {
     button:focus {
         border: 0;
     }
+    button::-moz-focus-inner {
+        border-color: rgba(0, 0, 0, 0.0);
+    }
     #a3 {
         left: 0;
         top: 0;
@@ -483,6 +486,9 @@ aside.popup {
             min-height: 41px;
             line-height: 41px;
         }
+    }
+    .time {
+        float: right;
     }
     .loading.indeterminate {
         min-height: 41px;

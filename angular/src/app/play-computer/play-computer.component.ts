@@ -12,11 +12,10 @@ import GameState from '../shared/gamestate';
 export class PlayComputerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription;
   protected playerMove: HTMLAudioElement;
-  protected sounds: {[key: string]: HTMLAudioElement} = {};
   private state: GameState;
 
   constructor(private game: GameService) {
-    this.sounds.move = new Audio('/assets/player-move.mp3');
+    this.playerMove = new Audio('./assets/player-move.mp3');
   }
 
   ngOnInit() {
@@ -24,7 +23,7 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     this.subscriptions = new Subscription();
     this.subscriptions.add(
       this.game.state.subscribe((_state: GameState) => {
-        console.log('game.state updated:', _state);
+        console.log('game.state changed:', _state);
         this.state = _state;
       })
     )
@@ -44,7 +43,6 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     // On page load, we want to immediatley start a game against a computer
     if (type === 'ai') this.game.sendQueue('ai');
     if (type === 'pvp') this.game.sendQueue('pvp');
-    // this.clearBoard();
   }
 
   private place = (event: MouseEvent) => {
@@ -67,7 +65,7 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     if (square.charAt(1) === '3') x = 0;
     // Only move if it is the player's turn
     if (this.state.board[x][y].length === 0 && this.state.isPlayerTurn) {
-      this.sounds.move.play();
+      this.playerMove.play();
       this.game.move(x, y);
     } else if (!this.state.isPlayerTurn) {
       console.error(`Wait for your opponent to move!`)
