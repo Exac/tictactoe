@@ -3,7 +3,7 @@ import "reflect-metadata";
 import chalk from 'chalk';
 import { getConnection, Connection } from 'typeorm';
 import { User } from './entity/User';
-import { Request, Response, Router } from 'express';
+import { Request, Response, Router, NextFunction } from 'express';
 import express from 'express';
 import bodyParser from 'body-parser'
 import * as bcrypt from 'bcrypt';
@@ -28,6 +28,16 @@ let app: express.Express = express().use(bodyParser.json());
     app.use(allowCrossDomain);
     app.use(cors());
     app.use(expressJwt({ secret: process.env['jwt_secret']! }).unless({ path: ['/api/auth', '/api/register', '/api/test'] }))
+    app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
+        if(err.name === 'UnauthorizedError') {
+            console.log(chalk.white.bgRed(`[TTT.server.http]`) + ` No token provided to API.`)
+            return res.status(403).send({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+        return next;
+    })
     app.use(morgan(function (tokens: morgan.TokenIndexer, req: Request, res: Response) {
         morgan.token('request', function getRequest(req) {
             if (req.body && req.body.password) req.body.password = '**********'; // Don't log people's passwords
@@ -48,19 +58,20 @@ let app: express.Express = express().use(bodyParser.json());
     console.log(chalk.black.bgGreen(`[TTT.server.http]`) + ` Database connection successful`)
 
     app.get('/api/test', async function (req: Request, res: Response) {
-        let board: string[][] = [['', '', ''], ['x', 'x', 'o'], ['', '', '']];
-        let g: Game = new Game();
-        g.x = 1;
-        g.o = 0;
-        g.xstatus = 'connected'
-        g.ostatus = 'connected'
-        g.board = board;
-        let gameRepository = connection.getRepository(Game);
-        let x = await gameRepository.save(g);
-        console.log('g added', x)
+        // let board: string[][] = [['', '', ''], ['x', 'x', 'o'], ['', '', '']];
+        // let g: Game = new Game();
+        // g.x = 1;
+        // g.o = 0;
+        // g.xstatus = 'connected'
+        // g.ostatus = 'connected'
+        // g.board = board;
+        // let gameRepository = connection.getRepository(Game);
+        // let x = await gameRepository.save(g);
+        // console.log('g added', x)
 
-        let gamefromdb = await gameRepository.findOne({ game_id: x.game_id });
-        res.send('check database' + JSON.stringify(gamefromdb))
+        // let gamefromdb = await gameRepository.findOne({ game_id: x.game_id });
+        // res.send('check database' + JSON.stringify(gamefromdb))
+        res.send(`<h1>/api/test</h1>`)
     });
 
     app.get('/', (req: Request, res: Response) => {

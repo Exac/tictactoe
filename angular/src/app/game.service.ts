@@ -16,7 +16,7 @@ export class GameService {
   public state: BehaviorSubject<GameState> = new BehaviorSubject<GameState>(new GameState());
   public secondsInQueue: number = 0;
   private static secondsInQueuePoll;
-  private wsurl = `ws://localhost:3000/`;
+  private wsurl = `ws://${window.location.hostname}:3000/`;
   private socket: WebSocket = new WebSocket(this.wsurl);
   private messageQueue: any[] = [];
 
