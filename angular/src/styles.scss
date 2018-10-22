@@ -146,12 +146,12 @@ nav.sitenav {
         @media only screen and (orientation: landscape) {
             justify-self: center;
             width: calc(100vh - 0px - (2 * 2rem));
-            max-height: calc(100vh - 0px - (2 * 2rem));
+            max-height: calc(100vh - 50px - (2 * 2rem));
             max-width: calc(100vh - 0px - (2 * 2rem));
         }
         @media only screen and (orientation: portrait) {
             width: calc(100vw - 0px - (2 * 2rem));
-            max-height: calc(100vw - 0px - (2 * 2rem));
+            max-height: calc(100vw - 50px - (2 * 2rem));
             max-width: calc(100vw - 0px - (2 * 2rem));
         }
     }
