@@ -200,6 +200,7 @@ export class GameService {
    * messages to send when the socket connects to the server.
    */
   private queue = (data?: any) => {
+    console.log(`%c[TTT.game.service]%c  queue ${JSON.stringify(data)}`, `color: black; background: white;`)
     const size = this.messageQueue.length;
 
     if (data) {

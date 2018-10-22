@@ -43,7 +43,9 @@ let app: express.Express = express().use(bodyParser.json());
             if (req.body && req.body.password) req.body.password = '**********'; // Don't log people's passwords
             return JSON.stringify(req.body);
         })
+        // Log the following in order:
         return [
+            chalk.black.bgWhite(`[TTT]`),
             tokens.method(req, res),
             tokens.url(req, res),
             tokens.status(req, res),
@@ -84,12 +86,16 @@ let app: express.Express = express().use(bodyParser.json());
         const USERS = await connection.manager.find(User);
         const user = USERS.find(user => user.alias == body.alias);
         if (!user) {
-            console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` Failed to find user with alias ${body.alias}.`);
+            console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` Failed to find user with alias '${body.alias}'.`);
+            return res.sendStatus(401);
+        }
+        if(!body.password) {
+            console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` No password provided for user ${body.alias}.`);
             return res.sendStatus(401);
         }
         let match = await bcrypt.compare(body.password, user.password)
         if (!match) {
-            console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` Unauthorized login attempt`);
+            console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` Unauthorized login attempt.`);
             return res.sendStatus(401);
         }
 
@@ -101,7 +107,7 @@ let app: express.Express = express().use(bodyParser.json());
             },
             process.env['JWT_SECRET']!,
             { expiresIn: '2h' });
-        console.log(chalk.black.bgGreen(`[TTT.server.http]`) + ` Login successful for user:`, user)
+        console.log(chalk.black.bgGreen(`[TTT.server.http]`) + ` Login successful for user:`, user.user_id)
         return res.send({ token });
     })
     app.get('/api/auth', async function (req: Request, res: Response) {
