@@ -1,7 +1,7 @@
 import readline from 'readline';
 import chalk from 'chalk';
 import WebSocket from 'ws';
-import * as http from 'http'; 
+import * as http from 'http';
 import app from './server.http'
 import * as jwt from 'jsonwebtoken';
 import { getConnection, Connection } from 'typeorm';
@@ -13,6 +13,10 @@ import Message from './networking/message.i';
 import QueueMessage from './networking/queueMessage';
 import MatchMessage from './networking/matchMessage';
 import AI from './ai';
+import UpdateMessage from './networking/updateMessage';
+import GameoverMessage from './networking/gameoverMessage';
+import TMessage from './networking/tmessage';
+import SynMessage from './networking/synMessage';
 
 
 // Add isAlive property to ws so we can close abandoned connections
@@ -23,7 +27,8 @@ interface WebSocketTTT extends WebSocket {
     /**
      * The type of queue the user is in. Blank for not queued.
      */
-    queue: '' | 'ai' | 'pvp' | 'pve';
+    // queue: '' | 'ai' | 'pvp' | 'pve';
+    queue: string;
 }
 
 interface ServerTTT extends WebSocket.Server {
@@ -64,18 +69,19 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
         })
 
         ws.on('message', function incoming(message: WebSocket.Data) {
-            let msg: any = parseJSON(message.toString());
+            let messageO: { type: string, auth: string, data: any[] } = JSON.parse(message as string);
+            let msg = parseMessage(message.toString());
 
             try {
-                var decodedJwt: any = jwt.verify(msg.auth, process.env['JWT_SECRET']!);
+                var decodedJwt: any = jwt.verify(messageO.auth, process.env['JWT_SECRET']!);
             } catch (err) {
                 console.log(chalk.black.bgRedBright(`[TTT.server.ws]`) + ` Failed JWT authentication`, err.message);
                 ws.send(JSON.stringify({ type: 'reauth', data: { 'error': err.message } }));
                 return;
             }
 
-            let type: string = msg.type; // queue | match | update | gameover
-            let data: any = msg.data;
+            let type: string = messageO.type; // queue | match | update | gameover
+            let data = messageO.data;
             let userId = decodedJwt['user_id'];
             let userAlias = decodedJwt['alias'];
 
@@ -96,7 +102,7 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
                     console.error(chalk.black.bgRedBright(`[TTT.server.ws]`) + ` Client cannot send 'match' messages.`);
                     break;
                 case 'update':
-
+                    playerMoved(data, ws);
                     break;
                 case 'gameover':
                     console.error(chalk.black.bgRedBright(`[TTT.server.ws]`) + ` Client cannot send 'gameover' messages.`);
@@ -106,6 +112,10 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
             }
 
         });
+
+        async function playerMoved(data: any, ws: WebSocketTTT) {
+            console.log(`player moved`, data, ws.userAlias)
+        }
 
 
         /**
@@ -212,22 +222,32 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
     })
 
     /**
-         * parseJSON returns a parsed object from the supplied string if possible
-         * @param str String that is potentially JSON
-         */
-    function parseJSON(str: string): object | string {
+     * parseMessage to coerce Message type
+     * @param str Message data. Convert buffers to strings before passing.
+     */
+    function parseMessage(str: string) {
         try {
-            let obj: object = JSON.parse(str);
+            let obj = JSON.parse(str);
             // JSON.parse(null) => null, so check for it here.
             if (obj && typeof obj === 'object') {
-                return obj;
+                if (isUpdateMessage(obj)) return new UpdateMessage(obj.data[0], obj.data[1]);
+                if (isGameoverMessage(obj)) return new GameoverMessage(obj.data[0], obj.data[1], obj.data[2], obj.data[3], obj.data[4], obj.data[5]);
+                if (isMatchMessage(obj)) return new MatchMessage(obj.data[0], obj.data[1], obj.data[2], obj.data[3]);
+                if (isQueueMessage(obj)) return new QueueMessage(obj.data[0]);
+                if (isSynMessage(obj)) return new SynMessage();
+            } else {
+                console.log(chalk.white.bgRed(`[TTT.server.ws]`) + ` Message type '${obj.type}' unknown.`)
             }
-        } catch (err) {
-            // Return str
-        }
-
-        return str;
+        } catch (err) { }
+        return new TMessage();
     }
+
+    // Message TypeGuards
+    function isUpdateMessage(obj: Message): obj is UpdateMessage { return obj.type === 'update'; }
+    function isGameoverMessage(obj: Message): obj is GameoverMessage { return obj.type === 'gameover'; }
+    function isMatchMessage(obj: Message): obj is MatchMessage { return obj.type === 'match'; }
+    function isQueueMessage(obj: Message): obj is QueueMessage { return obj.type === 'queue'; }
+    function isSynMessage(obj: Message): obj is SynMessage { return obj.type === 'syn'; }
 
 })();
 

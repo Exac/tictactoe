@@ -36,6 +36,7 @@ let app: express.Express = express().use(bodyParser.json());
                 message: 'No token provided'
             });
         }
+        console.log('returning next')
         return next;
     })
     app.use(morgan(function (tokens: morgan.TokenIndexer, req: Request, res: Response) {

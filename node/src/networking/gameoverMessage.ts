@@ -1,7 +1,7 @@
 import Message from './message.i';
 
 export default class GameoverMessage implements Message {
-    public type: string = 'match';
+    public type: string = 'gameover';
     public auth: string = '';
     public data: any[] = [];
 

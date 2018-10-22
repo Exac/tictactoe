@@ -155,6 +155,16 @@ export class GameService {
     this.queue(message);
   }
 
+  public sendUpdate(gameId: number, board: string[][]) {
+    let message: any = {};
+    message.type = 'update';
+    message.auth = localStorage.getItem('access_token');
+    message.data = [];
+    message.data[0] = gameId;
+    message.data[1] = board;
+    this.queue(message);
+  }
+
   public setState = (state: GameState) => {
     console.log('state change detected');
     this.state.next(state);
@@ -182,6 +192,9 @@ export class GameService {
   public move = (x: number, y: number): boolean => {
     if (this.state.value.isPlayerTurn && this.state.value.board[x][y].length === 0) {
       this.state.value.board[x][y] = this.state.value.isPlayerTurn ? this.state.value.playerType : this.state.value.opponentType;
+      // inform the server of your move
+      this.sendUpdate(this.state.value.gameId, this.state.value.board);
+      console.log(`MOVED ${x},${y}. board: ${JSON.stringify(this.state.getValue().board)}`)
       return true;
     } else {
       return false;
@@ -200,7 +213,8 @@ export class GameService {
    * messages to send when the socket connects to the server.
    */
   private queue = (data?: any) => {
-    console.log(`%c[TTT.game.service]%c  queue ${JSON.stringify(data)}`, `color: black; background: white;`)
+    // console.log(`%c[TTT.game.service]%c  queue ${JSON.stringify(data)}`, `color: black; background: white;`)
+    // console.log(`queue ${JSON.stringify(data)}`)
     const size = this.messageQueue.length;
 
     if (data) {
