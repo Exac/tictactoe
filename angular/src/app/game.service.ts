@@ -47,7 +47,7 @@ export class GameService {
     }
 
     this.socket.onerror = (error: ErrorEvent) => {
-      console.log('ERROR: ', error.message);
+      console.log('ERROR: Socket error:', error.message);
       // this.socket.close();
     }
 
@@ -72,16 +72,47 @@ export class GameService {
         this.handleMatch({ type: data.type, data: data.data });
       }
       if (data.type === 'update') {
-        console.log('GAME STATE UPDATE')
+        this.handleUpdate(data.data);
       }
       if (data.type === 'gameover') {
-        console.log('GAME OVER')
+        this.handleGameover(data.data);
       }
       if (data.type === 'reauth') {
         this.handleReAuth();
       }
 
     }
+  }
+
+  private handleGameover = (data) => {
+    // Extract values from message
+    let board: string[][] = data[0];
+    let winner: 'x' | 'o' | false = data[1];
+    let playerEloChange: number = data[2];
+    let playerElo: number = data[3];
+    let opponentEloChange: number = data[4];
+    let opponentElo: number = data[5];
+
+    // Get reference to game state
+    let _state = this.state.getValue();
+
+    // update game state
+    _state.board = board;
+    _state.winner = winner;
+
+    // Propogate state changes
+    this.setState(_state);
+  }
+
+  private handleUpdate = (data) => {
+    let gameId: number = data[0];
+    if (this.state.getValue().gameId !== gameId) {
+      return console.error(`%c[TTT.game.service]`, `background: red; color: white`, ` Update recieved for wrong game.`);
+    }
+    let board: string[][] = data[1];
+    this.state.getValue().board = board;
+    this.setState(this.state.getValue());
+    console.log('GAME STATE UPDATE', data)
   }
 
   private handleMatch = (message: { type: string, data: any[] }) => {

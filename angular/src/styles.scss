@@ -449,6 +449,44 @@ nav.sitenav {
     }
 }
 
+aside.gameover {
+    display: flex;
+    flex-direction: column;
+    justify-content:center; 
+    box-sizing: content-box;
+    position: absolute;
+    overflow: hidden;
+    top: 41px;
+    left: 41px;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 3px;
+    color: #312e2b;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    @media only screen and (max-width: 340px) {
+        padding: 0.5rem;
+    }
+    @media only screen and (max-height: 300px) {
+        top: 0;
+        left: 0;
+    }
+    * {
+        margin: 0.5rem 1rem;
+    }
+    button {
+        position: static;
+        height: unset;
+        width: unset;
+        padding: 1rem 2rem;
+        background-color: $color-link;
+        color: #ffffff;
+        border-radius: 3px;
+    }
+}
+
 aside.popup {
     position: absolute;
     overflow: hidden;

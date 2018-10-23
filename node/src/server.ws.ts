@@ -102,7 +102,7 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
                     console.error(chalk.black.bgRedBright(`[TTT.server.ws]`) + ` Client cannot send 'match' messages.`);
                     break;
                 case 'update':
-                    playerMoved(data, ws);
+                    playerMoved(msg, ws);
                     break;
                 case 'gameover':
                     console.error(chalk.black.bgRedBright(`[TTT.server.ws]`) + ` Client cannot send 'gameover' messages.`);
@@ -113,8 +113,53 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
 
         });
 
-        async function playerMoved(data: any, ws: WebSocketTTT) {
-            console.log(`player moved`, data, ws.userAlias)
+        async function playerMoved(msg: UpdateMessage, ws: WebSocketTTT) {
+            let gameId: number = msg.data[0];
+            let board: string[][] = msg.data[1];
+            let gameRepository = database.getRepository(Game);
+            let userRepository = database.getRepository(User);
+
+            // PvE Games
+            if (gameId < 0 || typeof gameId === 'undefined') {
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        board[i][j] = board[i][j] === 'x' ? 'x' : 'o';
+                    }
+                }
+                let m: UpdateMessage = new UpdateMessage(0, board);
+                return ws.send(JSON.stringify({ type: m.type, data: m.data }));
+            }
+
+            // PvE Games
+            if (gameId === 0) {
+                // sleep for a moment
+                await new Promise(resolve => setTimeout(resolve, 120));
+
+                // detect if player won
+                if (AI.isWinner(board)) {
+                    // let aiType: 'x' | 'o' | false = AI.getNextPlayerTypeFromBoard(board);
+                    let winnerType = AI.getWinner(board);
+                    // let aiTypeXO: 'x' | 'o' = aiType === 'x' ? 'x' : 'o';
+                    let m: GameoverMessage = new GameoverMessage(board, winnerType, 25, 1525, -25, 1475);
+                    return ws.send(JSON.stringify({ type: m.type, data: m.data }));
+                }
+
+                // figure out where to move to
+                let response = AI.getMove(board, AI.getNextPlayerTypeFromBoard(board));
+
+                // detect a winner
+                if (AI.isWinner(board)) {
+                    let winnerType = AI.getWinner(board);
+                    let m: GameoverMessage = new GameoverMessage(board, winnerType, 25, 1525, -25, 1475);
+                    return ws.send(JSON.stringify({ type: m.type, data: m.data }));
+                }
+
+                let m: UpdateMessage = new UpdateMessage(0, response);
+                return ws.send(JSON.stringify({ type: m.type, data: m.data }));
+            }
+
+            // let game = await gameRepository.findOneOrFail({ game_id: gameId });
+            // console.log(`playerMoved`, game)
         }
 
 

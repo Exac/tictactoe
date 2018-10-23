@@ -1,7 +1,7 @@
 import Message from './message.i';
 
 export default class UpdateMessage implements Message {
-    public type: string = 'match';
+    public type: string = 'update';
     public auth: string;
     public data: any[] = [];
 

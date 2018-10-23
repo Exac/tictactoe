@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+
 export default class AI {
     constructor() {
 
@@ -7,24 +9,37 @@ export default class AI {
         let board = JSON.parse(JSON.stringify(_board));
         let turn = AI.getTurnFromBoard(board);
         // Turn 1
-        if (AI.smoosh(board, 1).every(e => e === '')) { // Check for empty board
-            // choose a random corner
-            let x: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
-            let y: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
-            board[x][y] = 'x';
-            return board;
+        if (turn === 1) {
+            // Check for empty board
+            if (AI.smoosh(board, 1).every(e => e === '')) {
+                // choose a random corner
+                let x: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
+                let y: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
+                board[x][y] = 'x';
+                return board;
+            } else {
+                return board;
+            }
         } else if (turn === 2) {
-            if (board[1][1] !== 'x' && board[1][1] !== 'o') {
+            if (board[1][1] === '') {
+                console.log(chalk.white.bgBlue(`[TTT.ai]`) + ` t2: take center`);
                 board[1][1] = type; // Take center square if avaliable
                 return board;
             } else {
                 // take a corner
-                let x: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
-                let y: number = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
-                // don't try and take a corner that is occupied
-                while (board[x][y] !== '') {
-                    x = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
-                    y = Math.floor(Math.random() * 2) === 0 ? 2 : 0;
+                switch (Math.floor(Math.random() * 4)) {
+                    case 0:
+                        board[0][0] = type;
+                        break;
+                    case 1:
+                        board[2][0] = type;
+                        break;
+                    case 2:
+                        board[2][2] = type;
+                        break;
+                    case 3:
+                        board[0][2] = type;
+                        break;
                 }
                 return board;
             }
@@ -42,66 +57,79 @@ export default class AI {
                 return AI.placeDouble(board, type);
             }
         } else {
-            console.log('ANTI-TRIPLE VS BOARD')
             console.log(JSON.stringify(AI.placeAntiTriple(board, type)))
             console.log(JSON.stringify(_board))
-            if(JSON.stringify(AI.placeAntiTriple(board, type)) !== JSON.stringify(_board)) {
+            console.log(chalk.white.bgBlue(`[TTT.ai]`) + ` equal:`, (JSON.stringify(AI.placeAntiTriple(board, type)) !== JSON.stringify(_board)));
+            if (JSON.stringify(AI.placeAntiTriple(board, type)) !== JSON.stringify(_board)) {
+                console.log(chalk.white.bgBlue(`[TTT.ai]`) + ' ANTI-TRIPLE VS BOARD')
                 return AI.placeAntiTriple(board, type);
             } else {
+                console.log(chalk.white.bgBlue(`[TTT.ai]`) + ' DOUBLE VS BOARD')
                 return AI.placeDouble(board, type);
             }
         }
+
+    }
+
+    /**
+     * Can the AI take square x,y, or does the opponent already have it?
+     * @param board board
+     * @param x x coord AI wants to move to
+     * @param y y coord AI wants to move to
+     */
+    public static try(board: string[][], x: number, y: number): boolean {
+        return board[x][y] === '';
     }
 
     public static placeAntiTriple(_board: string[][], type: 'x' | 'o'): string[][] {
         let board: string[][] = JSON.parse(JSON.stringify(_board));
         // imgur.com/aZP97ZZ.jpg
 
-        let op: string = type === 'x' ? 'o' : 'x'; // Opponent's type
-        let x: number = 0;
-        let y: number = 0;
+        let ot: string = type === 'x' ? 'o' : 'x'; // Opponent's type
+        let x: number = -1;
+        let y: number = -1;
         // Check all 8 combinations
         // H1
-        if (board[0][0] === op && board[0][1] === op && board[0][2] === '') { x = 0; y = 2; } // xxx
-        if (board[0][0] === op && board[0][1] === '' && board[0][2] === op) { x = 0; y = 1; } // 
-        if (board[0][0] === '' && board[0][1] === op && board[0][2] === op) { x = 0; y = 0; } // 
+        if (board[0][0] === ot && board[0][1] === ot && board[0][2] === '') { if (AI.try(board, 0, 2)) { x = 0; y = 2; } } // xxx
+        if (board[0][0] === ot && board[0][1] === '' && board[0][2] === ot) { if (AI.try(board, 0, 1)) { x = 0; y = 1; } } // 
+        if (board[0][0] === '' && board[0][1] === ot && board[0][2] === ot) { if (AI.try(board, 0, 0)) { x = 0; y = 0; } } // 
         // H2
-        if (board[1][0] === op && board[1][1] === op && board[1][2] === '') { x = 1; y = 2; } // 
-        if (board[1][0] === op && board[1][1] === '' && board[1][2] === op) { x = 1; y = 1; } // xxx
-        if (board[1][0] === '' && board[1][1] === op && board[1][2] === op) { x = 1; y = 0; } // 
+        if (board[1][0] === ot && board[1][1] === ot && board[1][2] === '') { if (AI.try(board, 1, 2)) { x = 1; y = 2; } } // 
+        if (board[1][0] === ot && board[1][1] === '' && board[1][2] === ot) { if (AI.try(board, 1, 1)) { x = 1; y = 1; } } // xxx
+        if (board[1][0] === '' && board[1][1] === ot && board[1][2] === ot) { if (AI.try(board, 1, 0)) { x = 1; y = 0; } } // 
         // H3
-        if (board[2][0] === op && board[2][1] === op && board[2][2] === '') { x = 2; y = 2; } // 
-        if (board[2][0] === op && board[2][1] === '' && board[2][2] === op) { x = 2; y = 1; } // 
-        if (board[2][0] === '' && board[2][1] === op && board[2][2] === op) { x = 2; y = 0; } // xxx
+        if (board[2][0] === ot && board[2][1] === ot && board[2][2] === '') { if (AI.try(board, 2, 2)) { x = 2; y = 2; } } // 
+        if (board[2][0] === ot && board[2][1] === '' && board[2][2] === ot) { if (AI.try(board, 2, 1)) { x = 2; y = 1; } } // 
+        if (board[2][0] === '' && board[2][1] === ot && board[2][2] === ot) { if (AI.try(board, 2, 0)) { x = 2; y = 0; } } // xxx
         // V1
-        if (board[0][0] === op && board[0][0] === op && board[0][0] === '') { x = 0; y = 0; } // x
-        if (board[1][0] === op && board[1][0] === '' && board[1][0] === op) { x = 1; y = 0; } // x
-        if (board[2][0] === '' && board[2][0] === op && board[2][0] === op) { x = 2; y = 0; } // x
+        if (board[0][0] === ot && board[1][0] === ot && board[2][0] === '') { if (AI.try(board, 0, 0)) { x = 0; y = 0; } } // x
+        if (board[0][0] === ot && board[1][0] === '' && board[2][0] === ot) { if (AI.try(board, 1, 0)) { x = 1; y = 0; } } // x
+        if (board[0][0] === '' && board[1][0] === ot && board[2][0] === ot) { if (AI.try(board, 2, 0)) { x = 2; y = 0; } } // x
         // V2
-        if (board[0][1] === op && board[0][1] === op && board[0][1] === '') { x = 0; y = 1; } //  x
-        if (board[1][1] === op && board[1][1] === '' && board[1][1] === op) { x = 1; y = 1; } //  x
-        if (board[2][1] === '' && board[2][1] === op && board[2][1] === op) { x = 2; y = 1; } //  x
+        if (board[0][1] === ot && board[1][1] === ot && board[2][1] === '') { if (AI.try(board, 0, 1)) { x = 0; y = 1; } } //  x
+        if (board[0][1] === ot && board[1][1] === '' && board[2][1] === ot) { if (AI.try(board, 1, 1)) { x = 1; y = 1; } } //  x
+        if (board[0][1] === '' && board[1][1] === ot && board[2][1] === ot) { if (AI.try(board, 2, 1)) { x = 2; y = 1; } } //  x
         // V3
-        if (board[0][2] === op && board[0][2] === op && board[0][2] === '') { x = 0; y = 2; } //   x
-        if (board[1][2] === op && board[1][2] === '' && board[1][2] === op) { x = 1; y = 2; } //   x
-        if (board[2][2] === '' && board[2][2] === op && board[2][2] === op) { x = 2; y = 2; } //   x
+        if (board[0][2] === ot && board[1][2] === ot && board[2][2] === '') { if (AI.try(board, 0, 2)) { x = 0; y = 2; } } //   x
+        if (board[0][2] === ot && board[1][2] === '' && board[2][2] === ot) { if (AI.try(board, 1, 2)) { x = 1; y = 2; } } //   x
+        if (board[0][2] === '' && board[1][2] === ot && board[2][2] === ot) { if (AI.try(board, 2, 2)) { x = 2; y = 2; } } //   x
         // DU
-        if (board[0][2] === op && board[1][1] === op && board[2][0] === '') { x = 2; y = 0; } //   x
-        if (board[0][2] === op && board[1][1] === '' && board[2][0] === op) { x = 1; y = 1; } //  x 
-        if (board[0][2] === '' && board[1][1] === op && board[2][0] === op) { x = 0; y = 2; } // x
+        if (board[2][0] === ot && board[1][1] === ot && board[0][2] === '') { if (AI.try(board, 2, 0)) { x = 2; y = 0; } } //   x
+        if (board[2][0] === ot && board[1][1] === '' && board[0][2] === ot) { if (AI.try(board, 1, 1)) { x = 1; y = 1; } } //  x 
+        if (board[2][0] === '' && board[1][1] === ot && board[0][2] === ot) { if (AI.try(board, 0, 2)) { x = 0; y = 2; } } // x
         // DD
-        if (board[0][0] === op && board[1][1] === op && board[2][2] === '') { x = 2; y = 2; } // x
-        if (board[0][0] === op && board[1][1] === '' && board[2][2] === op) { x = 1; y = 1; } //  x
-        if (board[0][0] === '' && board[1][1] === op && board[2][2] === op) { x = 0; y = 0; } //   x
+        if (board[0][0] === ot && board[1][1] === ot && board[2][2] === '') { if (AI.try(board, 2, 2)) { x = 2; y = 2; } } // x
+        if (board[0][0] === ot && board[1][1] === '' && board[2][2] === ot) { if (AI.try(board, 1, 1)) { x = 1; y = 1; } } //  x
+        if (board[0][0] === '' && board[1][1] === ot && board[2][2] === ot) { if (AI.try(board, 0, 0)) { x = 0; y = 0; } } //   x
 
-        if (typeof x === 'number' && typeof y === 'number') {
-            board[x][y] = type;
+        if (x === -1 || y === -1) {
+            // nothing changed, return the original board
+            return board;
         }
 
+        board[x][y] = type;
         return board;
     }
-
-
 
     /**
      * Makes a random double move.
@@ -233,5 +261,46 @@ export default class AI {
         smoosh.forEach((square) => { turn = square === 'x' || square === 'o' ? turn + 1 : turn });
         ++turn;
         return turn
+    }
+
+    /**
+     * does 'x' or 'o' move next?
+     */
+    public static getNextPlayerTypeFromBoard = (board: string[][]): 'x' | 'o' => {
+        let turn = AI.getTurnFromBoard(board);
+        return turn % 2 === 0 ? 'o' : 'x';
+    }
+
+    /**
+     * Is there a winning combo on the board?
+     * @param _board 
+     */
+    public static getWinner(_board: string[][]): 'x' | 'o' | false {
+        // make a copy of the board
+        let b = JSON.parse(JSON.stringify(_board));
+
+        /**
+         * Are all three tictactoe squares x's or o's?
+         */
+        function areLine(a: string, b: string, c: string): boolean {
+            // Blanks don't count
+            if (a === '') return false;
+            return (a === b && a === c);
+        }
+
+        if (areLine(b[0][0], b[0][1], b[0][2])) return b[0][0];
+        if (areLine(b[1][0], b[1][1], b[1][2])) return b[1][0];
+        if (areLine(b[2][0], b[2][1], b[2][2])) return b[2][0];
+        if (areLine(b[0][0], b[1][0], b[2][0])) return b[0][0];
+        if (areLine(b[0][1], b[1][1], b[2][1])) return b[0][1];
+        if (areLine(b[0][2], b[1][2], b[2][2])) return b[0][2];
+        if (areLine(b[0][0], b[1][1], b[2][2])) return b[0][0];
+        if (areLine(b[2][0], b[1][1], b[0][2])) return b[2][0];
+
+        return false;
+    }
+
+    public static isWinner(board: string[][]): boolean {
+        return AI.getWinner(board) !== false;
     }
 }

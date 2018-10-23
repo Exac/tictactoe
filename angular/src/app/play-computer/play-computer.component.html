@@ -2,7 +2,7 @@
   <nav class="sitenav">
 
   </nav>
-  
+
   <section class="playarea" [class.myturn]="state.isPlayerTurn">
     <span class="coords" style="left: -1rem; top: 83.4%;">1</span>
     <span class="coords" style="left: -1rem; top: 50.0%;">2</span>
@@ -35,6 +35,11 @@
       <div class="message">
         <span>Attempting to reconnect.</span>
       </div>
+    </aside>
+    <aside *ngIf="state.winner === state.playerType" class="gameover">
+      <h2>Game Over</h2>
+      <p>{{gameOverMessage}}</p>
+      <button (click)="queue($event, 'ai')">Play Again</button>
     </aside>
   </section>
   <aside class="sidebar">

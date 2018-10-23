@@ -79,4 +79,16 @@ export class PlayComputerComponent implements OnInit, OnDestroy {
     this.clearBoard();
   }
 
+  get gameOverMessage(): string {
+    let state: GameState = this.game.state.getValue();
+    let playerType: 'x' | 'o' = state.playerType;
+    let winner: 'x' | 'o' | false = state.winner;
+    if (!state.winner) return `Tie. Better luck next time.`;
+    if (winner === playerType) {
+      return `You win!`;
+    } else {
+      return `You lose.`;
+    }
+  }
+
 }
