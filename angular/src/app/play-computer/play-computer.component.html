@@ -36,7 +36,7 @@
         <span>Attempting to reconnect.</span>
       </div>
     </aside>
-    <aside *ngIf="state.winner === state.playerType" class="gameover">
+    <aside *ngIf="state.winner !== false" class="gameover">
       <h2>Game Over</h2>
       <p>{{gameOverMessage}}</p>
       <button (click)="queue($event, 'ai')">Play Again</button>

@@ -1,7 +1,8 @@
 "use strict";
 import "reflect-metadata";
 import chalk from 'chalk';
-import { getConnection, Connection } from 'typeorm';
+import { getConnection, Connection, createConnection } from 'typeorm';
+import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions'
 import { User } from './entity/User';
 import { Request, Response, Router, NextFunction } from 'express';
 import express from 'express';
@@ -12,6 +13,7 @@ import { Game } from './entity/Game';
 import cors from 'cors';
 import * as jwt from 'jsonwebtoken';
 import expressJwt from 'express-jwt';
+import { worker } from 'cluster';
 
 console.log(chalk.black.bgGreen(`[TTT.server.http]`) + ` loaded`)
 
@@ -29,7 +31,7 @@ let app: express.Express = express().use(bodyParser.json());
     app.use(cors());
     app.use(expressJwt({ secret: process.env['jwt_secret']! }).unless({ path: ['/api/auth', '/api/register', '/api/test'] }))
     app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
-        if(err.name === 'UnauthorizedError') {
+        if (err.name === 'UnauthorizedError') {
             console.log(chalk.white.bgRed(`[TTT.server.http]`) + ` No token provided to API.`)
             return res.status(403).send({
                 success: false,
@@ -56,7 +58,22 @@ let app: express.Express = express().use(bodyParser.json());
         ].join(' ')
     }));
 
-    let connection: Connection = await getConnection()
+    let connection: Connection;
+    try {
+        connection = await getConnection()
+    } catch (e) {
+        if (e.message === 'Connection "default" was not found.') {
+            // create a connection first
+            createConnection()
+                .then(async (con: Connection) => {
+                    connection = con;
+                })
+                .catch((error: Error) => {
+                    console.log(`Error connecting to database, ${error.message}`, true)
+                });
+        }
+    }
+
 
     console.log(chalk.black.bgGreen(`[TTT.server.http]`) + ` Database connection successful`)
 
@@ -90,7 +107,7 @@ let app: express.Express = express().use(bodyParser.json());
             console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` Failed to find user with alias '${body.alias}'.`);
             return res.sendStatus(401);
         }
-        if(!body.password) {
+        if (!body.password) {
             console.log(chalk.black.bgYellow(`[TTT.server.http]`) + ` No password provided for user ${body.alias}.`);
             return res.sendStatus(401);
         }

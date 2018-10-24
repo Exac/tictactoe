@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import * as http from 'http';
 import app from './server.http'
 import * as jwt from 'jsonwebtoken';
-import { getConnection, Connection } from 'typeorm';
+import { getConnection, Connection, createConnection } from 'typeorm';
 import { Observable, Subject, from, of, range } from 'rxjs';
 import { map, filter, switchMap } from 'rxjs/operators';
 import { Game } from './entity/Game';
@@ -20,7 +20,7 @@ import SynMessage from './networking/synMessage';
 
 
 // Add isAlive property to ws so we can close abandoned connections
-interface WebSocketTTT extends WebSocket {
+export interface WebSocketTTT extends WebSocket {
     isAlive: boolean;
     userId: number;
     userAlias: string;
@@ -31,21 +31,35 @@ interface WebSocketTTT extends WebSocket {
     queue: string;
 }
 
-interface ServerTTT extends WebSocket.Server {
+export interface ServerTTT extends WebSocket.Server {
     clients: Set<WebSocketTTT>;
     matches: Game[];
 }
 
 // Setup server
-const server = http.createServer();
-const wss: ServerTTT = new WebSocket.Server({ /*port: 3000,*/ clientTracking: true, server: server }) as ServerTTT;
+export const server = http.createServer();
+export const wss: ServerTTT = new WebSocket.Server({ /*port: 3000,*/ clientTracking: true, server: server }) as ServerTTT;
 wss.matches = [];
 console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
 
 !(async function () {
 
     // setup database connection
-    let database: Connection = await getConnection();
+    let database: Connection;
+    try {
+        database = await getConnection();
+    } catch (e) {
+        if (e.message === 'Connection "default" was not found.') {
+            // create a connection first
+            createConnection()
+                .then(async (con: Connection) => {
+                    database = con;
+                })
+                .catch((error: Error) => {
+                    console.log(`Error connecting to database, ${error.message}`, true)
+                });
+        }
+    }
 
     // Send requests to the HTTP app, and handle WebSockets connections here.
     server.on('request', app);
@@ -132,22 +146,20 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
 
             // PvE Games
             if (gameId === 0) {
-                // sleep for a moment
+                // Sleep for a moment
                 await new Promise(resolve => setTimeout(resolve, 120));
 
-                // detect if player won
+                // Detect if player won
                 if (AI.isWinner(board)) {
-                    // let aiType: 'x' | 'o' | false = AI.getNextPlayerTypeFromBoard(board);
                     let winnerType = AI.getWinner(board);
-                    // let aiTypeXO: 'x' | 'o' = aiType === 'x' ? 'x' : 'o';
                     let m: GameoverMessage = new GameoverMessage(board, winnerType, 25, 1525, -25, 1475);
                     return ws.send(JSON.stringify({ type: m.type, data: m.data }));
                 }
 
-                // figure out where to move to
+                // Figure out where to move to
                 let response = AI.getMove(board, AI.getNextPlayerTypeFromBoard(board));
 
-                // detect a winner
+                // Detect if AI won
                 if (AI.isWinner(board)) {
                     let winnerType = AI.getWinner(board);
                     let m: GameoverMessage = new GameoverMessage(board, winnerType, 25, 1525, -25, 1475);
@@ -157,9 +169,6 @@ console.log(chalk.black.bgGreen(`[TTT.server.ws]`) + ` loaded`)
                 let m: UpdateMessage = new UpdateMessage(0, response);
                 return ws.send(JSON.stringify({ type: m.type, data: m.data }));
             }
-
-            // let game = await gameRepository.findOneOrFail({ game_id: gameId });
-            // console.log(`playerMoved`, game)
         }
 
 
